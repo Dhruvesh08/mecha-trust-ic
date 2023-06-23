@@ -10,10 +10,11 @@ fn main() -> io::Result<()> {
     file.read_to_end(&mut buffer)?;
 
     // Process the data in the buffer
-    // For example, you can print the bytes
-    for byte in buffer {
-        println!("{}", byte);
-    }
+    // Convert the bytes to a string
+    let output = String::from_utf8_lossy(&buffer);
+
+    // Print the captured output
+    println!("{}", output);
 
     Ok(())
 }
