@@ -4,7 +4,7 @@ use std::io::{self, Read};
 
 fn main() -> io::Result<()> {
     // Open the file with a relative path
-    let mut file = File::open("./trustm_chipinfo")?;
+    let mut file = File::open("/MECHA_TEST/optiga_trust_m/trustm_chipinfo")?;
 
     // Read the contents of the file into a buffer
     let mut buffer = Vec::new();
