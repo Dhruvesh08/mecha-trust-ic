@@ -1,9 +1,10 @@
+
 use std::fs::File;
 use std::io::{self, Read};
 
 fn main() -> io::Result<()> {
-    // Open the file with an absolute path
-    let mut file = File::open("/MECHA_TEST/optiga_trust_m/trustm_chipinfo")?;
+    // Open the file with a relative path
+    let mut file = File::open("./trustm_chipinfo")?;
 
     // Read the contents of the file into a buffer
     let mut buffer = Vec::new();
