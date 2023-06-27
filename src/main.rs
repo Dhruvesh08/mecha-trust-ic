@@ -6,7 +6,7 @@ fn sign_file_with_key(
     output_file: &str,
     input_file: &str,
     hash: bool,
-) -> Result<(Vec<u8>, Vec<u8>), String> {
+) -> Result<(Vec<u8>), String> {
     let mut command = Command::new("/MECHA_TEST/optiga_trust_m/trustm_ecc_sign");
     command.args(&["-k", key_oid, "-o", output_file, "-i", input_file]);
     
@@ -20,9 +20,9 @@ fn sign_file_with_key(
         let file_contents = std::fs::read(output_file)
             .map_err(|e| format!("Failed to read the output file: {}", e))?;
         
-        let hash = extract_hash(&output.stdout)?;
+        // let hash = extract_hash(&output.stdout)?;
         
-        Ok((hash, file_contents))
+        Ok((file_contents))
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
         Err(format!("Failed to execute trustm_ecc_sign: {}", stderr))
@@ -56,9 +56,9 @@ fn main() {
     let hash = true;
     
     match sign_file_with_key(key_oid, output_file, input_file, hash) {
-        Ok((hash, file_contents)) => {
+        Ok((file_contents)) => {
             println!("Signature file generated successfully.");
-            println!("Hash: {:?}", hash);
+        
             println!("File contents: {:?}", file_contents);
         },
         Err(err) => {
