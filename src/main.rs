@@ -1,105 +1,68 @@
 use std::process::Command;
 use std::io::{self, Write};
 
-// Key type enum
-#[derive(Debug)]
-enum KeyType {
-    Auth,
-    Enc,
-    Hfwu,
-    DevM,
-    Sign,
-    Agmt,
-}
-
-// Key size enum
-#[derive(Debug)]
-enum KeySize {
-    ECC256,
-    ECC384,
-    ECC521,
-    Brainpool256,
-    Brainpool384,
-    Brainpool512,
-}
-
-// Generate ECC key pair using trustm_ecc_keygen binary
-fn generate_key_pair(oid: &str, key_type: KeyType, key_size: KeySize,file_name: &str) -> Result<String, io::Error> {
-    let type_code = match key_type {
-        KeyType::Auth => "0x01",
-        KeyType::Enc => "0x02",
-        KeyType::Hfwu => "0x04",
-        KeyType::DevM => "0x08",
-        KeyType::Sign => "0x10",
-        KeyType::Agmt => "0x20",
-    };
-
-    let size_code = match key_size {
-        KeySize::ECC256 => "0x03",
-        KeySize::ECC384 => "0x04",
-        KeySize::ECC521 => "0x05",
-        KeySize::Brainpool256 => "0x13",
-        KeySize::Brainpool384 => "0x15",
-        KeySize::Brainpool512 => "0x16",
-    };
-
-    let output = Command::new("/MECHA_TEST/optiga_trust_m/trustm_ecc_keygen")
-        .args(&["-g", oid, "-t", type_code, "-k", size_code, "-o", file_name ,"-s"])
-        .output()?;
-
+fn sign_file_with_key(
+    key_oid: &str,
+    output_file: &str,
+    input_file: &str,
+    hash: bool,
+) -> Result<(Vec<u8>, Vec<u8>), String> {
+    let mut command = Command::new("/MECHA_TEST/optiga_trust_m/trustm_ecc_sign");
+    command.args(&["-k", key_oid, "-o", output_file, "-i", input_file]);
+    
+    if hash {
+        command.arg("-H");
+    }
+    
+    let output = command.output().map_err(|e| format!("Failed to execute trustm_ecc_sign: {}", e))?;
+    
     if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-        Ok(stdout)
+        let file_contents = std::fs::read(output_file)
+            .map_err(|e| format!("Failed to read the output file: {}", e))?;
+        
+        let hash = extract_hash(&output.stdout)?;
+        
+        Ok((hash, file_contents))
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-        Err(io::Error::new(io::ErrorKind::Other, stderr))
+        Err(format!("Failed to execute trustm_ecc_sign: {}", stderr))
     }
 }
 
-// Extract public key from the output string
-fn extract_public_key(output: &str) -> Option<String> {
-    let lines: Vec<&str> = output.trim().lines().collect();
-    for line in lines.iter().rev() {
-        if line.starts_with("-----BEGIN PUBLIC KEY-----") {
-            return Some(line.to_string());
-        }
+fn extract_hash(output: &[u8]) -> Result<Vec<u8>, String> {
+    let lines = String::from_utf8_lossy(output);
+    
+    if let Some(hash_start) = lines.find("Hash Digest :") {
+        let hash_start = hash_start + 14; // Length of "Hash Digest : " string
+        let hash_end = lines.find("\n\n").unwrap_or(lines.len());
+        let hash_text = lines[hash_start..hash_end].trim();
+        
+        let hash_bytes: Vec<u8> = hash_text
+            .split_whitespace()
+            .map(|byte| u8::from_str_radix(byte, 16))
+            .collect::<Result<Vec<u8>, _>>()
+            .map_err(|e| format!("Failed to parse hash bytes: {}", e))?;
+        
+        Ok(hash_bytes)
+    } else {
+        Err("Hash digest not found in output".to_string())
     }
-    None
 }
-
-// Display the public key
-fn display_public_key(public_key: &str) {
-    println!("Public Key:\n{}", public_key);
-}
-
 
 fn main() {
-    let oid = "0xe0f3"; // Replace with the desired OID
-    let key_type = KeyType::Auth; // Replace with the desired key type
-    let key_size = KeySize::ECC256; // Replace with the desired key size
-    let file_name:&str = "pub_key.pem";
-    // Generate key pair
-    let output = match generate_key_pair(oid, key_type, key_size,file_name) {
-        Ok(output) => output,
+    let key_oid = "0xe0f3";
+    let output_file = "testsignature.bin";
+    let input_file = "helloworld.txt";
+    let hash = true;
+    
+    match sign_file_with_key(key_oid, output_file, input_file, hash) {
+        Ok((hash, file_contents)) => {
+            println!("Signature file generated successfully.");
+            println!("Hash: {:?}", hash);
+            println!("File contents: {:?}", file_contents);
+        },
         Err(err) => {
-            eprintln!("Error generating key pair: {}", err);
-            return;
+            println!("Signature file generation failed: {}", err);
         }
-    };
-
-
-    //println!("output: {}", output);
-    println!("output: {}", output);
-
-    // Extract public key
-    let public_key = match extract_public_key(&output) {
-        Some(public_key) => public_key,
-        None => {
-            eprintln!("Error extracting public key");
-            return;
-        }
-    };
-
-    // Display the public key
-    display_public_key(&public_key);
+    }
 }
