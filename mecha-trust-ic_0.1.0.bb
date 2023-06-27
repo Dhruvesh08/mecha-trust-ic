@@ -8,10 +8,10 @@ inherit cargo
 # how to get mecha-trust-ic could be as easy as but default to a git checkout:
 # SRC_URI += "crate://crates.io/mecha-trust-ic/0.1.0"
 SRC_URI += "git://github.com/Dhruvesh08/mecha-trust-ic.git;protocol=https;nobranch=1;branch=main"
-SRCREV = "31f2070f07f21350cae60b6f84c7af5039cb76f5"
+SRCREV = "5528cd3aea9c5bcbb12891fac3df273d6a4e7afe"
 S = "${WORKDIR}/git"
 CARGO_SRC_DIR = ""
-PV:append = ".AUTOINC+31f2070f07"
+PV:append = ".AUTOINC+5528cd3aea"
 
 # please note if you have entries that do not begin with crate://
 # you must change them to how that package can be fetched

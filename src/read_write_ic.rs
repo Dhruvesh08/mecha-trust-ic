@@ -1,7 +1,7 @@
 use std::{process::Command, io};
 
 pub fn write_data(file_path: &str, oid: &str) -> io::Result<()> {
-    let write_output = Command::new("./bin/trustm_data")
+    let write_output = Command::new("/MECHA_TEST/optiga_trust_m/trustm_data")
         .arg("-w")
         .arg(oid)
         .arg("-i")
@@ -20,7 +20,7 @@ pub fn write_data(file_path: &str, oid: &str) -> io::Result<()> {
 }
 
 pub fn read_data(oid: &str) -> io::Result<()> {
-    let read_output = Command::new("./bin/trustm_data")
+    let read_output = Command::new("/MECHA_TEST/optiga_trust_m/trustm_data")
         .arg("-r")
         .arg(oid)
         .output()?;
