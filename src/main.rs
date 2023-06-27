@@ -6,7 +6,7 @@ mod read_write_ic;
 
 
 fn main() -> io::Result<()> {
-    let file_path = "./1234.txt";
+    let file_path = "1234.txt";
     let oid = "0xe0e1";
 
     write_data(file_path, oid)?;
