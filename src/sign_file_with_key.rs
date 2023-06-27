@@ -7,7 +7,7 @@ fn sign_file_with_key(
     input_file: &str,
     hash: bool,
 ) -> Result<(Vec<u8>, Vec<u8>), String> {
-    let mut command = Command::new("./bin/trustm_ecc_sign");
+    let mut command = Command::new("/MECHA_TEST/optiga_trust_m/trustm_ecc_sign");
     command.args(&["-k", key_oid, "-o", output_file, "-i", input_file]);
     
     if hash {
@@ -49,20 +49,20 @@ fn extract_hash(output: &[u8]) -> Result<Vec<u8>, String> {
     }
 }
 
-// fn main() {
-//     let key_oid = "0xe0f3";
-//     let output_file = "testsignature.bin";
-//     let input_file = "helloworld.txt";
-//     let hash = true;
+fn main() {
+    let key_oid = "0xe0f3";
+    let output_file = "testsignature.bin";
+    let input_file = "helloworld.txt";
+    let hash = true;
     
-//     match sign_file_with_key(key_oid, output_file, input_file, hash) {
-//         Ok((hash, file_contents)) => {
-//             println!("Signature file generated successfully.");
-//             println!("Hash: {:?}", hash);
-//             println!("File contents: {:?}", file_contents);
-//         },
-//         Err(err) => {
-//             println!("Signature file generation failed: {}", err);
-//         }
-//     }
-// }
+    match sign_file_with_key(key_oid, output_file, input_file, hash) {
+        Ok((hash, file_contents)) => {
+            println!("Signature file generated successfully.");
+            println!("Hash: {:?}", hash);
+            println!("File contents: {:?}", file_contents);
+        },
+        Err(err) => {
+            println!("Signature file generation failed: {}", err);
+        }
+    }
+}
