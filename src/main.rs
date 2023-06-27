@@ -24,7 +24,7 @@ enum KeySize {
 }
 
 // Generate ECC key pair using trustm_ecc_keygen binary
-fn generate_key_pair(oid: &str, key_type: KeyType, key_size: KeySize) -> Result<String, io::Error> {
+fn generate_key_pair(oid: &str, key_type: KeyType, key_size: KeySize,file_name: &str) -> Result<String, io::Error> {
     let type_code = match key_type {
         KeyType::Auth => "0x01",
         KeyType::Enc => "0x02",
@@ -44,7 +44,7 @@ fn generate_key_pair(oid: &str, key_type: KeyType, key_size: KeySize) -> Result<
     };
 
     let output = Command::new("/MECHA_TEST/optiga_trust_m/trustm_ecc_keygen")
-        .args(&["-g", oid, "-t", type_code, "-k", size_code, "-s"])
+        .args(&["-g", oid, "-t", type_code, "-k", size_code, "-o", file_name ,"-s"])
         .output()?;
 
     if output.status.success() {
@@ -77,9 +77,9 @@ fn main() {
     let oid = "0xe0f3"; // Replace with the desired OID
     let key_type = KeyType::Auth; // Replace with the desired key type
     let key_size = KeySize::ECC256; // Replace with the desired key size
-
+    let file_name:&str = "pub_key.pem";
     // Generate key pair
-    let output = match generate_key_pair(oid, key_type, key_size) {
+    let output = match generate_key_pair(oid, key_type, key_size,file_name) {
         Ok(output) => output,
         Err(err) => {
             eprintln!("Error generating key pair: {}", err);
