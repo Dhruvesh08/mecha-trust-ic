@@ -87,15 +87,19 @@ fn main() {
         }
     };
 
-    // Extract public key
-    let public_key = match extract_public_key(&output) {
-        Some(public_key) => public_key,
-        None => {
-            eprintln!("Error extracting public key");
-            return;
-        }
-    };
 
-    // Display the public key
-    display_public_key(&public_key);
+    //println!("output: {}", output);
+    println!("output: {}", output);
+
+    // Extract public key
+    // let public_key = match extract_public_key(&output) {
+    //     Some(public_key) => public_key,
+    //     None => {
+    //         eprintln!("Error extracting public key");
+    //         return;
+    //     }
+    // };
+
+    // // Display the public key
+    // display_public_key(&public_key);
 }
